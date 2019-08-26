@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 func check(e error) {
 	if e != nil {
 		log.Fatal(e)
 	}
+}
+
+func isNumeric(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
 }
 
 func countEntriesInFile(filename string) uint {
@@ -21,27 +27,22 @@ func countEntriesInFile(filename string) uint {
 	f, err := os.Open(filename)
 	check(err)
 
-	reader := bufio.NewReader(f)
-	for {
-		udprn, err := reader.ReadBytes('\n')
-
-		if len(udprn) > 2 {
-			fmt.Printf("udprn: %s\n", udprn)
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if scannedLine := scanner.Text(); isNumeric(scannedLine) {
+			fmt.Println(scannedLine)
 			entryCount++
 		}
-
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
 	}
+
+	check(scanner.Err())
+
 	f.Close()
 
 	return entryCount
 }
 
 func main() {
-
 	filename := "testData/short.csv"
 	numEntries := countEntriesInFile(filename)
 
