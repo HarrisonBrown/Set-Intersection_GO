@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
+	"strings"
 )
 
 // Takes an error and fatally logs if it warrants it
@@ -26,14 +28,14 @@ func isNumeric(s *string) bool {
 // Given a filepath, returns:
 //    - a count of all udprn values
 //    - a map of distinct udprn values to their number of occurences
-func countEntriesInFile(filename string) (uint, map[string]uint8) {
+func countEntriesInFile(filepath string) (uint, map[string]uint8) {
 
 	// Output data
 	var entryCount uint
 	distinctEntrySet := make(map[string]uint8)
 
 	// Open provided filepath into an os.File - f
-	f, err := os.Open(filename)
+	f, err := os.Open(filepath)
 	check(err)
 
 	// Scan each line, checking if it is numeric, increment the entry counters if so
@@ -68,16 +70,37 @@ func findOverlap(entriesA map[string]uint8, entriesB map[string]uint8) (uint, ui
 	return distinctOverlap, totalOverlap
 }
 
+// Asks the user for two file paths consecutively, returns each as individual string
+func promptAndReadFilePaths() (string, string) {
+
+	var filepaths [2]string
+
+	for i := 0; i < 2; i++ {
+		fmt.Printf("Filepath %d: ", i+1)
+		scanner := bufio.NewReader(os.Stdin)
+		filepaths[i], _ = scanner.ReadString('\n')
+
+		// Remove line ending from filepath
+		filepaths[i] = strings.TrimSuffix(filepaths[i], "\n")
+
+		// Windows lines are terminated with \r\n, so remove \r too
+		if runtime.GOOS == "windows" {
+			filepaths[i] = strings.TrimSuffix(filepaths[i], "\r")
+		}
+	}
+
+	return filepaths[0], filepaths[1]
+}
+
 func main() {
 
-	filenameA := "testData/short_a.csv"
-	filenameB := "testData/short_b.csv"
+	filepathA, filepathB := promptAndReadFilePaths()
 
-	numEntriesA, distinctEntriesA := countEntriesInFile(filenameA)
-	numEntriesB, distinctEntriesB := countEntriesInFile(filenameB)
+	numEntriesA, distinctEntriesA := countEntriesInFile(filepathA)
+	numEntriesB, distinctEntriesB := countEntriesInFile(filepathB)
 	distinctOverlap, totalOverlap := findOverlap(distinctEntriesA, distinctEntriesB)
 
-	fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filenameA, numEntriesA, len(distinctEntriesA))
-	fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filenameB, numEntriesB, len(distinctEntriesB))
+	fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filepathA, numEntriesA, len(distinctEntriesA))
+	fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filepathB, numEntriesB, len(distinctEntriesB))
 	fmt.Printf("Total overlap: %d, distinct overlap: %d\n", totalOverlap, distinctOverlap)
 }
