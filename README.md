@@ -11,7 +11,7 @@ Included in this repo are two executables, one for windows and one for linux. Si
 From within the repository directory, run:
 
 ```
-.\setIntersection.exe [pathToFirstFile] [pathToSecondFile]
+.\setIntersection.exe .\testData\A_f.csv .\testData\B_f.csv
 ```
 
 ### Linux
@@ -19,7 +19,7 @@ From within the repository directory, run:
 From within the repository directory, run:
 
 ```
-./setIntersection [pathToFirstFile] [pathToSecondFile]
+./setIntersection ./testData/A_f.csv ./testData/B_f.csv
 ```
 
 
