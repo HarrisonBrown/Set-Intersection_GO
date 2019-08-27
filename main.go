@@ -15,16 +15,16 @@ func check(e error) {
 	}
 }
 
-func isNumeric(s string) bool {
+func isNumeric(s *string) bool {
 
-	_, err := strconv.ParseFloat(s, 64)
+	_, err := strconv.ParseFloat(*s, 64)
 	return err == nil
 }
 
-func countEntriesInFile(filename string) (uint, uint) {
+func countEntriesInFile(filename string) (uint, map[string]uint8) {
 
 	var entryCount uint
-	distinctEntrySet := make(map[string]bool)
+	distinctEntrySet := make(map[string]uint8)
 
 	// Open file into an os.File - f
 	f, err := os.Open(filename)
@@ -32,9 +32,9 @@ func countEntriesInFile(filename string) (uint, uint) {
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		if scannedLine := scanner.Text(); isNumeric(scannedLine) {
-			distinctEntrySet[scannedLine] = true
-			fmt.Println(scannedLine)
+		if scannedLine := scanner.Text(); isNumeric(&scannedLine) {
+			distinctEntrySet[scannedLine]++
+			//fmt.Println(scannedLine)
 			entryCount++
 		}
 	}
@@ -43,14 +43,29 @@ func countEntriesInFile(filename string) (uint, uint) {
 
 	f.Close()
 
-	return entryCount, uint(len(distinctEntrySet))
+	return entryCount, distinctEntrySet
 }
 
 func main() {
 
-	filename := "testData/A_f.csv"
+	filenameA := "testData/short_a.csv"
+	filenameB := "testData/short_b.csv"
 
-	numEntries, numDistinctEntries := countEntriesInFile(filename)
+	numEntriesA, distinctEntriesA := countEntriesInFile(filenameA)
+	numEntriesB, distinctEntriesB := countEntriesInFile(filenameB)
 
-	fmt.Printf("%d entries in file %q, of which %d are distinct.", numEntries, filename, numDistinctEntries)
+	fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filenameA, numEntriesA, len(distinctEntriesA))
+	fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filenameB, numEntriesB, len(distinctEntriesB))
+
+	// Find overlap
+	var distinctOverlap uint
+	var totalOverlap uint
+	for entry, occurences := range distinctEntriesA {
+		if distinctEntriesB[entry] > 0 {
+			distinctOverlap++
+			totalOverlap += uint(occurences) + uint(distinctEntriesB[entry])
+		}
+	}
+
+	fmt.Printf("Total Overlap: %d, Distinct Overlap: %d\n", totalOverlap, distinctOverlap)
 }
