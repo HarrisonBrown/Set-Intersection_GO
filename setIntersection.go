@@ -18,58 +18,6 @@ func check(e error) {
 	}
 }
 
-// Returns true/false whether the given string is numeric
-func isNumeric(s *string) bool {
-
-	_, err := strconv.ParseFloat(*s, 64)
-	return err == nil
-}
-
-// Given a filepath, returns:
-//    - a count of all udprn values
-//    - a map of distinct udprn values to their number of occurences
-func countEntriesInFile(filepath string) (uint, map[string]uint8) {
-
-	// Output data
-	var entryCount uint
-	distinctEntrySet := make(map[string]uint8)
-
-	// Open provided filepath into an os.File - f
-	f, err := os.Open(filepath)
-	check(err)
-
-	// Scan each line, checking if it is numeric, increment the entry counters if so
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		if scannedLine := scanner.Text(); isNumeric(&scannedLine) {
-			distinctEntrySet[scannedLine]++
-			entryCount++
-		}
-
-		// Check for any non-EOF errors
-		check(scanner.Err())
-	}
-
-	f.Close()
-
-	return entryCount, distinctEntrySet
-}
-
-// Given two maps of udprn entries to their occurence count, return the number of distinct and total overlaps
-func findOverlap(entriesA map[string]uint8, entriesB map[string]uint8) (uint, uint) {
-	// Find overlap
-	var distinctOverlap uint
-	var totalOverlap uint
-	for entry, occurences := range entriesA {
-		if entriesB[entry] > 0 {
-			distinctOverlap++
-			totalOverlap += uint(occurences) + uint(entriesB[entry])
-		}
-	}
-
-	return distinctOverlap, totalOverlap
-}
-
 // Asks the user for two file paths consecutively, returns each as individual string
 func promptAndReadFilePaths() (string, string) {
 
@@ -90,6 +38,53 @@ func promptAndReadFilePaths() (string, string) {
 	}
 
 	return filepaths[0], filepaths[1]
+}
+
+// Given a filepath, returns:
+//    - a count of all udprn values
+//    - a map of distinct udprn values to their number of occurences
+func countEntriesInFile(filepath string) (uint, map[uint32]uint8) {
+
+	// Output data
+	var entryCount uint
+	distinctEntrySet := make(map[uint32]uint8)
+
+	// Open provided filepath into an os.File - f
+	f, err := os.Open(filepath)
+	check(err)
+
+	// Scan each line, attempting to convert it to a numeric value,
+	// Store the value as a key in the map and increment the entry counters if so
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		scannedLine := scanner.Text()
+		if value, err := strconv.ParseUint(scannedLine, 10, 32); err == nil {
+			distinctEntrySet[uint32(value)]++
+			entryCount++
+		}
+
+		// Check for any non-EOF errors
+		check(scanner.Err())
+	}
+
+	f.Close()
+
+	return entryCount, distinctEntrySet
+}
+
+// Given two maps of udprn entries to their occurence count, return the number of distinct and total overlaps
+func findOverlap(entriesA map[uint32]uint8, entriesB map[uint32]uint8) (uint, uint) {
+	// Find overlap
+	var distinctOverlap uint
+	var totalOverlap uint
+	for entry, occurences := range entriesA {
+		if entriesB[entry] > 0 {
+			distinctOverlap++
+			totalOverlap += uint(occurences) + uint(entriesB[entry])
+		}
+	}
+
+	return distinctOverlap, totalOverlap
 }
 
 func main() {
