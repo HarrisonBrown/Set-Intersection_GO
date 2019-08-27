@@ -27,7 +27,7 @@ From within the repository directory, run:
 
 The program works by scanning through each line in the CSV and attempting to convert it to a numeric value, if it succeeds that value is then stored as a key in a map to a counter of the number of occurences. This means when repeated numbers occur, they are not added multiple times but instead increment the counter mapped to their value, avoiding the need for huge numbers of comparisons. While scanning through the file, it also increments a simple counter for each numeric value it comes across, this is where the total count for a given file is found while the distinct count comes from the length of the map.
 
-Once the two files have been counted and sorted into their maps a comparison is done of the two maps, iterating over one and checking the count of the value in the other map. The distinct overlap is then however many values are present in the both maps while the total overlap is the count of all the occurences of any values that are present in both.
+Once the two files have been counted and sorted into their maps a comparison is done of the two maps, iterating over one and checking the count of the value in the other map. The distinct overlap is then however many values are present in the both maps while the total overlap is the multiplication of the occurences in the first map by the occurences in the second.
 
 ## Notes
 

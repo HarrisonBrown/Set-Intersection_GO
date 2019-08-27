@@ -80,7 +80,7 @@ func findOverlap(entriesA map[uint32]uint8, entriesB map[uint32]uint8) (uint, ui
 	for entry, occurences := range entriesA {
 		if entriesB[entry] > 0 {
 			distinctOverlap++
-			totalOverlap += uint(occurences) + uint(entriesB[entry])
+			totalOverlap += uint(occurences) * uint(entriesB[entry])
 		}
 	}
 
