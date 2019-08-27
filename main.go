@@ -94,13 +94,38 @@ func promptAndReadFilePaths() (string, string) {
 
 func main() {
 
-	filepathA, filepathB := promptAndReadFilePaths()
+	numArgs := len(os.Args[1:])
 
-	numEntriesA, distinctEntriesA := countEntriesInFile(filepathA)
-	numEntriesB, distinctEntriesB := countEntriesInFile(filepathB)
-	distinctOverlap, totalOverlap := findOverlap(distinctEntriesA, distinctEntriesB)
+	if numArgs == 1 {
 
-	fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filepathA, numEntriesA, len(distinctEntriesA))
-	fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filepathB, numEntriesB, len(distinctEntriesB))
-	fmt.Printf("Total overlap: %d, distinct overlap: %d\n", totalOverlap, distinctOverlap)
+		// Only one argument passed, treat it as just one filepath to be analysed
+		filepathA := os.Args[1]
+
+		numEntriesA, distinctEntriesA := countEntriesInFile(filepathA)
+		fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filepathA, numEntriesA, len(distinctEntriesA))
+
+	} else {
+
+		var filepathA, filepathB string
+
+		if numArgs >= 2 {
+
+			// At least two arguments passed, treat the first two as filepaths to be analysed and ignore the rest
+			filepathA = os.Args[1]
+			filepathB = os.Args[2]
+
+		} else {
+
+			// No arguments passed, prompt the user for some filepaths
+			filepathA, filepathB = promptAndReadFilePaths()
+		}
+
+		numEntriesA, distinctEntriesA := countEntriesInFile(filepathA)
+		numEntriesB, distinctEntriesB := countEntriesInFile(filepathB)
+		distinctOverlap, totalOverlap := findOverlap(distinctEntriesA, distinctEntriesB)
+
+		fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filepathA, numEntriesA, len(distinctEntriesA))
+		fmt.Printf("File %q contains %d entries, of which %d are distinct.\n", filepathB, numEntriesB, len(distinctEntriesB))
+		fmt.Printf("Total overlap: %d, distinct overlap: %d\n", totalOverlap, distinctOverlap)
+	}
 }
